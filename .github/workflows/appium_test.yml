@@ -1,0 +1,55 @@
+name: Cordova Appium WebView Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install global dependencies
+      run: |
+        npm install -g cordova appium
+        cordova telemetry off
+
+    - name: Install project dependencies
+      run: npm install
+
+    - name: Add Android platform
+      run: cordova platform add android
+
+    - name: Build Cordova app
+      run: cordova build android
+
+    - name: Set up Android Emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: default
+        arch: x86_64
+        profile: Nexus 6
+        script: echo "Ready"
+
+    - name: Start Appium server
+      run: appium --log-level error &
+      shell: bash
+
+    - name: Wait for Appium server to start
+      run: |
+        npx wait-on http://localhost:4723/wd/hub/status
+
+    - name: Run Appium tests
+      run: npx mocha test/appium.test.js
