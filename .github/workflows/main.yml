@@ -23,34 +23,33 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Add Android platform
-      run: cordova platform add android
+    # - name: Add Android platform
+    #   run: cordova platform add android
 
-    - name: Build APK
-      run: cordova build android
+    # - name: Build APK
+    #   run: cordova build android
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: cordova-apk
-        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+    # - name: Upload APK
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: cordova-apk
+    #     path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Set up Android Emulator
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 30
-        target: default
-        arch: x86_64
-        profile: Nexus 6
-        script: echo "Ready"
+    # - name: Set up Android Emulator
+    #   uses: reactivecircus/android-emulator-runner@v2
+    #   with:
+    #     api-level: 30
+    #     target: default
+    #     arch: x86_64
+    #     profile: Nexus 6
+    #     script: echo "Ready"
 
     - name: Start Appium server
       run: appium --log-level error &
       shell: bash
 
     - name: Wait for Appium server to start
-      run: |
-          ./node_modules/.bin/wait-on http://localhost:4723/wd/hub/status
+      run: wait-on http://localhost:4723/wd/hub/status
 
         # npx wait-on http://localhost:4723/wd/hub/status
 
