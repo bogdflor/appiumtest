@@ -47,7 +47,7 @@ jobs:
           appium --log-level info > appium.log 2>&1 &
     
           # Wait for Appium server to be ready
-          wait-on http://localhost:4723/wd/hub/status
+          wait-on http://localhost:5554/wd/hub/status
     
           # Run your tests
           npx mocha test/appium.test.js
