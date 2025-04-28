@@ -18,7 +18,7 @@ jobs:
         node-version: '18'
 
     - name: Install Cordova
-      run: npm install -g cordova appium
+      run: npm install -g cordova appium wait-on
 
     - name: Install dependencies
       run: npm install
@@ -44,13 +44,15 @@ jobs:
         profile: Nexus 6
         script: echo "Ready"
 
-    # - name: Start Appium server
-    #   run: appium --log-level error &
-    #   shell: bash
+    - name: Start Appium server
+      run: appium --log-level error &
+      shell: bash
 
-    # - name: Wait for Appium server to start
-    #   run: |
-    #     npx wait-on http://localhost:4723/wd/hub/status
+    - name: Wait for Appium server to start
+      run: |
+          ./node_modules/.bin/wait-on http://localhost:4723/wd/hub/status
 
-    # - name: Run Appium tests
-    #   run: npx mocha test/appium.test.js
+        # npx wait-on http://localhost:4723/wd/hub/status
+
+    - name: Run Appium tests
+      run: npx mocha test/appium.test.js
