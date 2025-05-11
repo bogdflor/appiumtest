@@ -44,8 +44,12 @@ jobs:
         profile: Nexus 6
         script: |
           # Start Appium server in background
-          appium --log-level info > appium.log 2>&1 &
-    
+          nohup  appium --log-level info > appium.log 2>&1 &
+          sleep 5
+          
+          echo "===== Appium Log Output ====="
+          cat appium.log
+          
           # Wait for Appium server to be ready
           wait-on http://localhost:5554/wd/hub/status
     
