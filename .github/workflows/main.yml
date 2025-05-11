@@ -43,6 +43,9 @@ jobs:
         arch: x86_64
         profile: Nexus 6
         script: |
+          # Install Android driver
+          appium driver install uiautomator2
+          
           # Start Appium server in background
           nohup  appium --log-level info > appium.log 2>&1 &
           sleep 50
