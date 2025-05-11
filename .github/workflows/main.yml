@@ -52,8 +52,10 @@ jobs:
           echo "===== Appium Log Finished ====="
           
           # Wait for Appium server to be ready
-          wait-on http://127.0.0.1:4723/wd/hub/status
-
+          # wait-on http://127.0.0.1:4723/wd/hub/status
+          
+          curl http://localhost:4723/wd/hub/status
+          
           # Run your tests
           npx mocha test/appium.test.js
 
