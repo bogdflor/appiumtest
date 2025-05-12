@@ -2,7 +2,7 @@ const wd = require('wd');
 const path = require('path');
 
 (async () => {
-  const driver = wd.promiseChainRemote("http://127.0.0.1:4723/wd/hub");
+  const driver = wd.promiseChainRemote("http://127.0.0.1:4723");
 
   const appPath = path.resolve(__dirname, "../platforms/android/app/build/outputs/apk/debug/app-debug.apk");
 
