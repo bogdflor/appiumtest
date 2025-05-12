@@ -23,8 +23,10 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Set up Android SDK components
+    - name: Install Android SDK components
       run: |
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
         yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
     - name: Install Cordova
