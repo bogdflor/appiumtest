@@ -18,7 +18,7 @@ jobs:
         node-version: '18'
 
     - name: Install Cordova
-      run: npm install -g cordova appium wait-on
+      run: npm install -g cordova appium wait-on wd
 
     - name: Install dependencies
       run: npm install
