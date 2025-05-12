@@ -23,17 +23,17 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    # - name: Add Android platform
-    #   run: cordova platform add android
+    - name: Add Android platform
+      run: cordova platform add android
 
-    # - name: Build APK
-    #   run: cordova build android
+    - name: Build APK
+      run: cordova build android
 
-    # - name: Upload APK
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: cordova-apk
-    #     path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: cordova-apk
+        path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
     - name: Set up Android Emulator
       uses: reactivecircus/android-emulator-runner@v2
@@ -59,7 +59,7 @@ jobs:
           
           curl http://127.0.0.1:4723/wd/hub/status
           
-          npm install --save-dev wd
+          npm install --save-dev wd path
           
           # Run your tests
           npx mocha test/appium.test.js
