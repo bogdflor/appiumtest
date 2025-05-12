@@ -9,15 +9,17 @@ describe('Appium Android App Test', function () {
   before(async () => {
     driver = await remote({
       protocol: 'http',
-      hostname: '127.0.0.1',
-      port: 4723,
+      hostname: process.env.APPIUM_HOST || '127.0.0.1',
+      port: parseInt(process.env.APPIUM_PORT || 4723),
       path: '/',
+      logLevel: 'debug',
       capabilities: {
         platformName: 'Android',
         'appium:deviceName': 'Android Emulator',
         'appium:automationName': 'UiAutomator2',
-        'appium:app': '/home/runner/work/appiumtest/appiumtest/platforms/android/app/build/outputs/apk/debug/app-debug.apk',
-        'appium:uiautomator2ServerInstallTimeout': 60000
+        'appium:app': process.env.APK_PATH || '/home/runner/work/appiumtest/appiumtest/platforms/android/app/build/outputs/apk/debug/app-debug.apk',
+        'appium:autoGrantPermissions': true,
+        'appium:newCommandTimeout': 60000
       },
     });
   });
