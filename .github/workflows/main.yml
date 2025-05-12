@@ -17,6 +17,16 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Set up Android SDK components
+      run: |
+        yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+
     - name: Install Cordova
       run: npm install -g cordova appium wait-on wd
 
