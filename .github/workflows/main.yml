@@ -70,22 +70,30 @@ jobs:
         target: default
         arch: x86_64
         profile: Nexus 6
-        script: |
+        script: |-
           # Install Appium driver
           appium driver install uiautomator2
           
-          # Start Appium with better configuration (all on one line)
+          # Start Appium server
           appium --address 127.0.0.1 --port 4723 --log-level debug --base-path /wd/hub --relaxed-security --session-override --default-capabilities '{"newCommandTimeout": 120}' > appium.log 2>&1 &
+          sleep 5
           
-          # Wait for Appium to start and verify
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null; then
-              echo "Appium server is running"
-              break
-            fi
-            echo "Waiting for Appium server... (Attempt $i)"
+          # Check if Appium is running
+          MAX_ATTEMPTS=30
+          COUNTER=0
+          until curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null || [ $COUNTER -eq $MAX_ATTEMPTS ]
+          do
+            echo "Waiting for Appium server... (Attempt $COUNTER)"
             sleep 2
+            COUNTER=$((COUNTER + 1))
           done
+          
+          if [ $COUNTER -eq $MAX_ATTEMPTS ]; then
+            echo "Appium server failed to start"
+            exit 1
+          fi
+          
+          echo "Appium server is running"
           
           # Wait for device
           adb wait-for-device
@@ -99,5 +107,9 @@ jobs:
           # Install test dependencies
           npm install --save-dev @wdio/cli webdriverio @wdio/local-runner @wdio/mocha-framework
           
-          # Run tests (all environment variables on one line)
-          APPIUM_HOST=127.0.0.1 APPIUM_PORT=4723 APPIUM_BASE_PATH=/wd/hub APK_PATH=$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk npx mocha test/test_wdio.js --timeout 300000
+          # Run tests
+          export APPIUM_HOST=127.0.0.1
+          export APPIUM_PORT=4723
+          export APPIUM_BASE_PATH=/wd/hub
+          export APK_PATH="$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+          npx mocha test/test_wdio.js --timeout 300000
