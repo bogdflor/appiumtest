@@ -43,7 +43,7 @@ jobs:
     - name: Clean and re-add Android platform
       run: |
         cordova platform remove android || true
-        cordova platform add android
+        cordova platform add android@14.0.0
 
     - name: Build APK
       run: cordova build android
