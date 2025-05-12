@@ -84,15 +84,15 @@ jobs:
           ps aux | grep appium
           
           # Try to connect multiple times
-          for i in {1..5}; do
-            if curl -s http://127.0.0.1:4723/status > /dev/null; then
-              echo "Appium server is running"
-              break
-            else
-              echo "Attempt $i: Waiting for Appium server..."
-              sleep 10
-            fi
-          done
+          # for i in {1..5}; do
+          #   if curl -s http://127.0.0.1:4723/status > /dev/null; then
+          #     echo "Appium server is running"
+          #     break
+          #   else
+          #     echo "Attempt $i: Waiting for Appium server..."
+          #     sleep 10
+          #   fi
+          # done
           
           # Wait for device
           adb wait-for-device
