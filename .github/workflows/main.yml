@@ -78,5 +78,6 @@ jobs:
           cat appium.log
           echo "===== Appium Log Finished ====="
           curl http://127.0.0.1:4723/wd/hub/status
-          npm install --save-dev wd path
+          # npm install --save-dev wd path
+          npm install --save-dev @wdio/cli webdriverio @wdio/local-runner @wdio/mocha-framework
           npx mocha test/appium.test.js
