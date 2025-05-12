@@ -17,17 +17,45 @@ jobs:
       with:
         node-version: '18'
 
-    - name: Install Cordova
-      run: npm install -g cordova appium
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install Android SDK components
+      run: |
+        export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          "cmdline-tools;latest" \
+          "platforms;android-35" \
+          "build-tools;35.0.0" \
+          "platform-tools"
+
+    - name: Ensure system dependencies for Cordova Android
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-17-jdk gradle zipalign
+
+    - name: Install Cordova and global dependencies
+      run: npm install -g cordova@12 appium wait-on wd
 
     - name: Install dependencies
       run: npm install
 
-    - name: Add Android platform
-      run: cordova platform add android
+    - name: Clean and re-add Android platform
+      run: |
+        cordova platform remove android || true
+        cordova platform add android@14 --save
 
     - name: Build APK
       run: cordova build android
+      env:
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -35,22 +63,61 @@ jobs:
         name: cordova-apk
         path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Set up Android Emulator
+    - name: Set up Android Emulator and run tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
         target: default
         arch: x86_64
         profile: Nexus 6
-        script: echo "Ready"
-
-    - name: Start Appium server
-      run: appium --log-level error &
-      shell: bash
-
-    - name: Wait for Appium server to start
-      run: |
-        npx wait-on http://localhost:4723/wd/hub/status
-
-    - name: Run Appium tests
-      run: npx mocha test/appium.test.js
+        script: |
+          #!/bin/bash
+          set -e
+          
+          # Install Appium driver
+          appium driver install uiautomator2
+          
+          # Start Appium server and wait for it
+          appium --address 127.0.0.1 --port 4723 --log-level debug --base-path /wd/hub --relaxed-security --session-override --default-capabilities '{"newCommandTimeout": 120}' > appium.log 2>&1 &
+          APPIUM_PID=$!
+          
+          echo "Waiting for Appium to start..."
+          sleep 5
+          
+          # Check if Appium server is running using a function
+          # check_appium() {
+          #   curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null
+          #   return $?
+          # }
+          
+          # Try to connect to Appium server
+          # RETRY_COUNT=0
+          # MAX_RETRIES=30
+          
+          # while ! check_appium; do
+          #   if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+          #     echo "Failed to start Appium server after $MAX_RETRIES attempts"
+          #     kill $APPIUM_PID
+          #     exit 1
+          #   fi
+          #   RETRY_COUNT=$((RETRY_COUNT + 1))
+          #   echo "Waiting for Appium server... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
+          #   sleep 2
+          # done
+          sleep 50
+          echo "Appium server is running"
+          
+          # Wait for device
+          adb wait-for-device
+          adb devices
+          
+          # Show Appium logs
+          echo "===== Appium Log Output ====="
+          cat appium.log
+          echo "===== Appium Log Finished ====="
+          
+          # Install test dependencies
+          npm install --save-dev @wdio/cli webdriverio @wdio/local-runner @wdio/mocha-framework
+          
+          # Run tests with environment variables
+          APPIUM_HOST=127.0.0.1  APPIUM_PORT=4723   APPIUM_BASE_PATH=/     APK_PATH="$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk"  npx mocha test/test_wdio.js --timeout 300000
