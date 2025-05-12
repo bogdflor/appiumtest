@@ -33,11 +33,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y openjdk-17-jdk gradle zipalign
-        
-    - name: Install Cordova
+
+    - name: Install Cordova and dependencies
       run: npm install -g cordova appium wait-on wd
 
-    - name: Install dependencies
+    - name: Install project dependencies
       run: npm install
 
     - name: Clean and re-add Android platform
@@ -54,7 +54,7 @@ jobs:
         name: cordova-apk
         path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Set up Android Emulator
+    - name: Set up Android Emulator and Run Tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -64,24 +64,20 @@ jobs:
         script: |
           # Install Android driver
           appium driver install uiautomator2
-          
+
           # Start Appium server in background
-          nohup  appium --log-level info > appium.log 2>&1 &
+          nohup appium --log-level info > appium.log 2>&1 &
           sleep 50
-          
+
           echo "===== Appium Log Output ====="
           cat appium.log
           echo "===== Appium Log Finished ====="
-          
+
           # Wait for Appium server to be ready
-          # wait-on http://localhost:4723/wd/hub/status
-          
           curl http://127.0.0.1:4723/wd/hub/status
-          
+
+          # Ensure test dependencies are installed locally
           npm install --save-dev wd path
-          
-          # Run your tests
+
+          # Run Appium tests
           npx mocha test/appium.test.js
-
-
-    
