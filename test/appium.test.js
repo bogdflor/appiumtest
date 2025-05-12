@@ -1,5 +1,6 @@
 // test/appium.test.js
 import wd from 'wd';
+import * as path from 'path'
 
 const driver = wd.promiseChainRemote("http://127.0.0.1:4723/wd/hub");
 const appPath = path.resolve(__dirname, "../platforms/android/app/build/outputs/apk/debug/app-debug.apk");
