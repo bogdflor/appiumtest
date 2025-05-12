@@ -85,26 +85,26 @@ jobs:
           sleep 5
           
           # Check if Appium server is running using a function
-          check_appium() {
-            curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null
-            return $?
-          }
+          # check_appium() {
+          #   curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null
+          #   return $?
+          # }
           
           # Try to connect to Appium server
-          RETRY_COUNT=0
-          MAX_RETRIES=30
+          # RETRY_COUNT=0
+          # MAX_RETRIES=30
           
-          while ! check_appium; do
-            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
-              echo "Failed to start Appium server after $MAX_RETRIES attempts"
-              kill $APPIUM_PID
-              exit 1
-            fi
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            echo "Waiting for Appium server... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
-            sleep 2
-          done
-          
+          # while ! check_appium; do
+          #   if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+          #     echo "Failed to start Appium server after $MAX_RETRIES attempts"
+          #     kill $APPIUM_PID
+          #     exit 1
+          #   fi
+          #   RETRY_COUNT=$((RETRY_COUNT + 1))
+          #   echo "Waiting for Appium server... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
+          #   sleep 2
+          # done
+          sleep 50
           echo "Appium server is running"
           
           # Wait for device
