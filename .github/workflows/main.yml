@@ -29,6 +29,11 @@ jobs:
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
         yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
+    - name: Ensure system dependencies for Cordova Android
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y openjdk-17-jdk gradle zipalign
+        
     - name: Install Cordova
       run: npm install -g cordova appium wait-on wd
 
