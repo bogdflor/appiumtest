@@ -26,7 +26,15 @@ jobs:
     - name: Install Android SDK components
       run: |
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
+
+        if [ ! -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
+          mv $ANDROID_SDK_ROOT/cmdline-tools/{,latest}
+        fi
+
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+
+        yes | sdkmanager --licenses
         yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
 
     - name: Ensure system dependencies for Cordova Android
@@ -34,19 +42,22 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y openjdk-17-jdk gradle zipalign
 
-    - name: Install Cordova and dependencies
+    - name: Install Cordova and global dependencies
       run: npm install -g cordova appium wait-on wd
 
-    - name: Install project dependencies
+    - name: Install dependencies
       run: npm install
 
     - name: Clean and re-add Android platform
       run: |
         cordova platform remove android || true
-        cordova platform add android@14.0.0
+        cordova platform add android
 
     - name: Build APK
       run: cordova build android
+      env:
+        ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+        JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.15-6/x64
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
@@ -54,7 +65,7 @@ jobs:
         name: cordova-apk
         path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
 
-    - name: Set up Android Emulator and Run Tests
+    - name: Set up Android Emulator and run tests
       uses: reactivecircus/android-emulator-runner@v2
       with:
         api-level: 30
@@ -62,22 +73,12 @@ jobs:
         arch: x86_64
         profile: Nexus 6
         script: |
-          # Install Android driver
           appium driver install uiautomator2
-
-          # Start Appium server in background
           nohup appium --log-level info > appium.log 2>&1 &
           sleep 50
-
           echo "===== Appium Log Output ====="
           cat appium.log
           echo "===== Appium Log Finished ====="
-
-          # Wait for Appium server to be ready
           curl http://127.0.0.1:4723/wd/hub/status
-
-          # Ensure test dependencies are installed locally
           npm install --save-dev wd path
-
-          # Run Appium tests
           npx mocha test/appium.test.js
