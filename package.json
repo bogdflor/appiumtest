@@ -1,6 +1,7 @@
 {
   "name": "com.c4n.appiumtest2",
   "displayName": "AppiumTest2",
+   "type": "module",
   "version": "1.0.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
