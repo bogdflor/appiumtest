@@ -70,28 +70,40 @@ jobs:
         target: default
         arch: x86_64
         profile: Nexus 6
-        script: |-
+        script: |
+          #!/bin/bash
+          set -e
+          
           # Install Appium driver
           appium driver install uiautomator2
           
-          # Start Appium server
+          # Start Appium server and wait for it
           appium --address 127.0.0.1 --port 4723 --log-level debug --base-path /wd/hub --relaxed-security --session-override --default-capabilities '{"newCommandTimeout": 120}' > appium.log 2>&1 &
+          APPIUM_PID=$!
+          
+          echo "Waiting for Appium to start..."
           sleep 5
           
-          # Check if Appium is running
-          MAX_ATTEMPTS=30
-          COUNTER=0
-          until curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null || [ $COUNTER -eq $MAX_ATTEMPTS ]
-          do
-            echo "Waiting for Appium server... (Attempt $COUNTER)"
-            sleep 2
-            COUNTER=$((COUNTER + 1))
-          done
+          # Check if Appium server is running using a function
+          check_appium() {
+            curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null
+            return $?
+          }
           
-          if [ $COUNTER -eq $MAX_ATTEMPTS ]; then
-            echo "Appium server failed to start"
-            exit 1
-          fi
+          # Try to connect to Appium server
+          RETRY_COUNT=0
+          MAX_RETRIES=30
+          
+          while ! check_appium; do
+            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+              echo "Failed to start Appium server after $MAX_RETRIES attempts"
+              kill $APPIUM_PID
+              exit 1
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "Waiting for Appium server... (Attempt $RETRY_COUNT/$MAX_RETRIES)"
+            sleep 2
+          done
           
           echo "Appium server is running"
           
@@ -107,9 +119,9 @@ jobs:
           # Install test dependencies
           npm install --save-dev @wdio/cli webdriverio @wdio/local-runner @wdio/mocha-framework
           
-          # Run tests
-          export APPIUM_HOST=127.0.0.1
-          export APPIUM_PORT=4723
-          export APPIUM_BASE_PATH=/wd/hub
-          export APK_PATH="$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk"
+          # Run tests with environment variables
+          APPIUM_HOST=127.0.0.1 \
+          APPIUM_PORT=4723 \
+          APPIUM_BASE_PATH=/wd/hub \
+          APK_PATH="$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk" \
           npx mocha test/test_wdio.js --timeout 300000
