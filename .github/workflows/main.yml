@@ -74,31 +74,28 @@ jobs:
           # Install Appium driver
           appium driver install uiautomator2
           
-          # Start Appium with explicit host and port
-          appium --address 127.0.0.1 --port 4723 --log-level debug > appium.log 2>&1 &
+          # Start Appium with better configuration
+          appium --address 127.0.0.1 --port 4723 --log-level debug \
+            --base-path /wd/hub \
+            --relaxed-security \
+            --session-override \
+            --default-capabilities '{"newCommandTimeout": 120}' > appium.log 2>&1 &
           
-          # Give Appium time to start
-          sleep 10
-          
-          # Check if Appium is running
-          ps aux | grep appium
-          
-          # Try to connect multiple times
-          # for i in {1..5}; do
-          #   if curl -s http://127.0.0.1:4723/status > /dev/null; then
-          #     echo "Appium server is running"
-          #     break
-          #   else
-          #     echo "Attempt $i: Waiting for Appium server..."
-          #     sleep 10
-          #   fi
-          # done
+          # Wait for Appium to start and verify
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null; then
+              echo "Appium server is running"
+              break
+            fi
+            echo "Waiting for Appium server... (Attempt $i)"
+            sleep 2
+          done
           
           # Wait for device
           adb wait-for-device
           adb devices
           
-          # Show Appium logs for debugging
+          # Show Appium logs
           echo "===== Appium Log Output ====="
           cat appium.log
           echo "===== Appium Log Finished ====="
@@ -106,5 +103,9 @@ jobs:
           # Install test dependencies
           npm install --save-dev @wdio/cli webdriverio @wdio/local-runner @wdio/mocha-framework
           
-          # Run tests
-          APPIUM_HOST=127.0.0.1 APPIUM_PORT=4723 npx mocha test/test_wdio.js --timeout 300000
+          # Run tests with environment variables
+          APPIUM_HOST=127.0.0.1 \
+          APPIUM_PORT=4723 \
+          APPIUM_BASE_PATH=/wd/hub \
+          APK_PATH=$(pwd)/platforms/android/app/build/outputs/apk/debug/app-debug.apk \
+          npx mocha test/test_wdio.js --timeout 300000
