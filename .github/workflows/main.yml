@@ -26,16 +26,14 @@ jobs:
     - name: Install Android SDK components
       run: |
         export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-        mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
-
-        if [ ! -d "$ANDROID_SDK_ROOT/cmdline-tools/latest" ]; then
-          mv $ANDROID_SDK_ROOT/cmdline-tools/{,latest}
-        fi
-
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
 
-        yes | sdkmanager --licenses
-        yes | sdkmanager "platforms;android-35" "build-tools;35.0.0" "platform-tools"
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
+        yes | sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          "cmdline-tools;latest" \
+          "platforms;android-35" \
+          "build-tools;35.0.0" \
+          "platform-tools"
 
     - name: Ensure system dependencies for Cordova Android
       run: |
@@ -43,7 +41,7 @@ jobs:
         sudo apt-get install -y openjdk-17-jdk gradle zipalign
 
     - name: Install Cordova and global dependencies
-      run: npm install -g cordova appium wait-on wd
+      run: npm install -g cordova@12 appium wait-on wd
 
     - name: Install dependencies
       run: npm install
@@ -51,7 +49,7 @@ jobs:
     - name: Clean and re-add Android platform
       run: |
         cordova platform remove android || true
-        cordova platform add android
+        cordova platform add android@14 --save
 
     - name: Build APK
       run: cordova build android
