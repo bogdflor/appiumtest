@@ -57,7 +57,7 @@ jobs:
           # Wait for Appium server to be ready
           # wait-on http://localhost:4723/wd/hub/status
           
-          curl http://localhost:4723/wd/hub/status
+          curl http://127.0.0.1:4723/wd/hub/status
           
           npm install --save-dev wd
           
