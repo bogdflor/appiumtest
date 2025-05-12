@@ -17,6 +17,7 @@ describe('Appium Android App Test', function () {
         'appium:deviceName': 'Android Emulator',
         'appium:automationName': 'UiAutomator2',
         'appium:app': '/home/runner/work/appiumtest/appiumtest/platforms/android/app/build/outputs/apk/debug/app-debug.apk',
+        'appium:uiautomator2ServerInstallTimeout': 60000
       },
     });
   });
