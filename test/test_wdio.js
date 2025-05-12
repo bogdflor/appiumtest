@@ -11,12 +11,12 @@ describe('Appium Android App Test', function () {
       protocol: 'http',
       hostname: '127.0.0.1',
       port: 4723,
-      path: '/', // Important: Appium 2 uses `/`
+      path: '/',
       capabilities: {
         platformName: 'Android',
-        deviceName: 'Android Emulator',
-        automationName: 'UiAutomator2',
-        app: '/home/runner/work/appiumtest/appiumtest/platforms/android/app/build/outputs/apk/debug/app-debug.apk',
+        'appium:deviceName': 'Android Emulator',
+        'appium:automationName': 'UiAutomator2',
+        'appium:app': '/home/runner/work/appiumtest/appiumtest/platforms/android/app/build/outputs/apk/debug/app-debug.apk',
       },
     });
   });
