@@ -59,6 +59,8 @@ jobs:
           
           curl http://localhost:4723/wd/hub/status
           
+          npm install -g wd
+          
           # Run your tests
           npx mocha test/appium.test.js
 
